@@ -1,0 +1,57 @@
+// Comopiling instructions for the WASP_LGRTC model, described in A computationally efficient model for probabilistic local warming projections constrained by history matching and pattern scaling
+
+// Manuscript for Geoscientific Model Development Discussions
+
+
+// Philip Goodwin1,*, Martin Leduc2, Antti-Ilari Partanen3, H. Damon Matthews4 and Alex Rogers5
+
+
+//1School of Ocean and Earth Science, University of Southampton, Southampton, SO14 3ZH, UK
+//2Ouranos, Montreal, Canada
+//3Climate System Research, Finnish Meteorological Institute, Helsinki, Finland
+//4Department of Geography, Planning and Environment, Concordia University, Montreal, Canada
+//5Department of Computer Science, University of Oxford, Oxford, UK
+
+
+// * Corresponding author, email: p.a.goodwin@soton.ac.uk
+
+
+
+//The Warming, Acidification and Sea-level Projector with Local to Global Temperature Change: WASP/LGRT (September 2019)
+
+//WASP is an 8-box representation of the Earth system for efficient very-large ensemble simulations.
+//Coded by Philip Goodwin, This version 16-September-2019
+
+
+//Citations for use of code:
+
+//This combined WASP/LGRTC model version:
+//Goodwin, P., M. Leduc, A.-I. Partanen, H.D. Matthews and A. Rogers (2019, submitted), A computationally efficient model for probabilistic local warming projections constrained by history matching and pattern scaling, submitted to Geoscientific Model Development Discussions.
+
+//Previous version of the WASP model:
+//Goodwin, P., V. M. Roussenov, A. Katavouta, G. L. Foster, E. J. Rohling and R. G. Williams (2018), Pathways to 1.5 and 2 °C warming based on observational and geological constraints, Nature Geoscience, doi:10.1038/s41561-017-0054-8.
+
+//WASP Model description:
+//Goodwin, P. (2016) How historic simulation-observation discrepancy affects future warming projections in a very large model ensemble, Climate Dynamics, CLDY-D-15-00368R2, doi: 10.1007/s00382-015-2960-z.
+
+//Utilising the input distribution for climate sensitivity, S=1/lambda, from geological data requires citation of:
+//Rohling, E. J. et al - Palaeosens Project Members (2012), Making sense of Palaeoclimate sensitivity, Nature 491, 683-691, doi:10.1038/nature11574.
+
+//The theory behind how WASP calculated atmospheric CO2 and surface temperature anomaly is given here:
+//Goodwin, P., R.G. Williams and A. Ridgwell (2015), Sensitivity of climate to cumulative carbon emissions due to compensation of ocean heat and carbon uptake, Nature Geoscience, Vol. 8, p29-34. doi:10.1038/ngeo2304.
+
+//If you use the sea level component of WASP (commented out in the code), also cite:
+//Goodwin, P., I. D. Haigh, E. J. Rohling, and A. Slangen (2017), A new approach to projecting 21st century sea-level changes and extremes, Earth’s Future, 5, doi:10.1002/2016EF000508.
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Code compiled on a Mac Darwin environment, operating system OS X version 10.11.6, using command line compilation on the Terminal.
+//To compile: place the files WASP_LGRTC_ESM_main.cpp and WASP_LGRTC_ESM_functions.cpp together in a directory. Add a folder called 'RESULTS' for the results files to be written into.
+//Using compiler g++ code can be compiled with command line: g++ -O3 -o WASP_LGRTC_ESM_main.cpp
+
+//This code has *not* been checked across a range of C++ compilers.
+//Also, the sequence of pseudo-random numbers may be compiler and platform dependent
+
+
