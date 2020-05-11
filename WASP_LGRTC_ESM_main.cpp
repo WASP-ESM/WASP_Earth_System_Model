@@ -84,27 +84,91 @@ int main()
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     //Choose the RCP forcing scenario//////////////////////////////////////////////////////////////////////////////
-    int RCP_scenario;
+    int Future_scenario;
+    int Spatial_scenario;
     
-    //Set RCP_scenario = 1 for RCP2.6, =2 for RCP4.5, =3 for RCP6.0 and =4 for RCP8.5
-    RCP_scenario = 4;
+    //This is target warming if on AMP scenario (for Future_scenario == 5)
+    double Target1 = 3.0;
+    double Target_threshold = 1.95; //The warming target above which generic≥2.0°C is used for spatial patterns on an AMP scenario
+    
+    //Set Future_scenario = 1 for RCP2.6, =2 for RCP4.5, =3 for RCP6.0 and =4 for RCP8.5
+    Future_scenario = 5;
+    
+    //Set Spatial_scenario = 1 for arbitrary (average spatial pattern from RCPs 2.6, 4.5 and 8.5), =2 for close to meeting or meeting Paris Agreement (average of RCP2.6 'peak warming' and RCP4.5, =3 for exceeding Paris Agreement (average of RCP4.5 and RCP8.5), =4 for RCP2.6 'peak', =5 for RCP4.5, =6 for RCP8.5.
+    Spatial_scenario = 1;
     
     //Choose the number of simulations in the initial ensemble/////////////////////////////////////////////////////
     int SCENARIOS; //This is the number of simulations in the initial ensemble - from which a smaller number will be extracted by the observational consistency tests
     
-    SCENARIOS = 3000000; //Number of scenarios in observation-consistent ensemble - maximum is 5000.
+    SCENARIOS = 3000000; //Number of scenarios in observation-consistent ensemble.
+    
+    //defining and calculating the combined-scenario LGRTC and Stdev in LGRTC
+    double LGRTC[64][128];
+    double Stdev_LGRTC[64][128];
+    
+    double LGRTC_combined_arbitrary[64][128];
+    double Stdev_LGRTC_combined_arbitrary[64][128];
+    
+    double LGRTC_combined_close_to_Paris[64][128];
+    double Stdev_LGRTC_combined_close_to_Paris[64][128];
+    
+    double LGRTC_combined_exceeding_Paris[64][128];
+    double Stdev_LGRTC_combined_exceeding_Paris[64][128];
+    
+    for (int k=0; k<64; k++)
+    {
+        for (int m=0; m<128; m++)
+        {
+            //For scenarios meeting or close to meeting the Paris Climate Agreement
+            LGRTC_combined_close_to_Paris[k][m] = (LGRTC_RCP26_peak[k][m] + LGRTC_RCP45[k][m])/2.0;
+            Stdev_LGRTC_combined_close_to_Paris[k][m] = sqrt( (Stdev_LGRTC_RCP26_peak[k][m]*Stdev_LGRTC_RCP26_peak[k][m]) + (Stdev_LGRTC_RCP45[k][m]*Stdev_LGRTC_RCP45[k][m]) );
+            
+            //This section claculates whether a point is insider the valid domain, and returns Not a Number if the point lies outside the domain
+            if( abs(LGRTC_RCP26_peak[k][m] - LGRTC_RCP45[k][m]) > Stdev_LGRTC_combined_close_to_Paris[k][m])
+            {
+                LGRTC_combined_close_to_Paris[k][m] = sqrt(-1.0);
+            }
+            
+            //For scenarios exceeding the Paris Climate Agreement
+            LGRTC_combined_exceeding_Paris[k][m] = (LGRTC_RCP85[k][m] + LGRTC_RCP45[k][m])/2.0;
+            Stdev_LGRTC_combined_exceeding_Paris[k][m] = sqrt( (Stdev_LGRTC_RCP85[k][m]*Stdev_LGRTC_RCP85[k][m]) + (Stdev_LGRTC_RCP45[k][m]*Stdev_LGRTC_RCP45[k][m]) );
+            
+            //This section claculates whether a point is insider the valid domain, and returns Not a Number if the point lies outside the domain
+            if( abs(LGRTC_RCP85[k][m] - LGRTC_RCP45[k][m]) > Stdev_LGRTC_combined_exceeding_Paris[k][m])
+            {
+                LGRTC_combined_exceeding_Paris[k][m] = sqrt(-1.0);
+            }
+            
+            //For arbitrary scenarios
+            LGRTC_combined_exceeding_Paris[k][m] = (LGRTC_RCP26_peak[k][m] + LGRTC_RCP85[k][m] + LGRTC_RCP45[k][m])/3.0;
+            Stdev_LGRTC_combined_arbitrary[k][m] = sqrt( (Stdev_LGRTC_RCP85[k][m]*Stdev_LGRTC_RCP85[k][m]) + (Stdev_LGRTC_RCP45[k][m]*Stdev_LGRTC_RCP45[k][m]) + (Stdev_LGRTC_RCP26_peak[k][m]*Stdev_LGRTC_RCP26_peak[k][m]));
+            
+            //This section claculates whether a point is insider the valid domain, and returns Not a Number if the point lies outside the domain
+            if( abs(LGRTC_RCP85[k][m] - LGRTC_RCP26_peak[k][m]) > Stdev_LGRTC_combined_arbitrary[k][m])
+            {
+                LGRTC_combined_arbitrary[k][m] = sqrt(-1.0);
+            }
+            
+            
+        }
+        
+    }
+    
+
     
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     //print to screen which RCP scenario is chosen and how many ensemble members are being generated
-    if(RCP_scenario == 1)
+    if(Future_scenario == 1)
         cout << "Generating an initial ensemble of " <<  SCENARIOS << " simulations following RCP2.6" << endl;
-    if(RCP_scenario == 2)
+    if(Future_scenario == 2)
         cout << "Generating an initial ensemble of " <<  SCENARIOS << " simulations following RCP4.5" << endl;
-    if(RCP_scenario == 3)
+    if(Future_scenario == 3)
         cout << "Generating an initial ensemble of " << SCENARIOS <<  " simulations following RCP6.0" << endl;
-    if(RCP_scenario == 4)
+    if(Future_scenario == 4)
         cout << "Generating an initial ensemble of " << SCENARIOS <<  " simulations following RCP8.5" << endl;
+    if(Future_scenario == 5)
+        cout << "Generating an initial ensemble of " << SCENARIOS <<  " simulations following an AMP scenario stabilising at " << Target1 << "degrees C warming" << endl;
     
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -114,12 +178,6 @@ int main()
     
     //This generates an array of spatial warming projections readable by MATLAB. Use ESM_4.m to then plot a figure in MATLAB
     ofstream results2 ("./RESULTS/Spatial_T_projection_2081_2100.m", std::ios::out);
-    
-    
-    
-    
-    
-   
     
     //Sets up the output files///////////////////////////////////////////////////////////////////
     
@@ -142,6 +200,16 @@ int main()
     //Surface temperature anomaly relative to preindustrial///////
     ofstream annual_warming ("./RESULTS/Warming.txt", std::ios::out);
     
+    
+    //Note in above files the un-weighted radiative forcing is used (i.e. no efficacy weighting is applied)
+    
+    ofstream Adjustment_TCRE ("./RESULTS/AdjustmentTCRE_INDC_SimTSL_AP2_coeff0.txt", std::ios::out);
+    
+    ofstream Adjustment_Emrate ("./RESULTS/AdjustmentEmrate_INDC_SimTSL_AP2_coeff0.txt", std::ios::out);
+    
+    ofstream Adjustment_DT ("./RESULTS/AdjustmentDT_INDC_SimTSL_AP2_coeff0.txt", std::ios::out);
+    
+    ofstream Adjustment_Emtime ("./RESULTS/AdjustmentEmtime_INDC_SimTSL_AP2_coeff0.txt", std::ios::out);
     
      /*
     //Outputs specific projections of temperature anonaly and carbon emissions for the 21st century/////////////////////////////////////
@@ -216,6 +284,29 @@ int main()
     
 
     //Definition of variables - while initial values are given, many parameters are re-assigned different values later
+    
+    //Parameters for assessing the TCRE and making a responsive emissions decision
+    double Assess_year1 = 2030.0;
+    double Assess_year2 = 2050.0;
+    double Assess_year3 = 2070.0;
+    
+    double TCRE_estimate = 0.0;
+    double Warming_in_period = 0.0;
+    double Emissions_in_period = 0.0;
+    double EmRate_Assessment=0.0;
+    
+    double I_remaining = 0.0;
+    double t_remaining = 0.0;
+    
+    double Coeff_Target = 0.0;
+    double TCRE_safety = 0.0;
+    
+    double Restore_year = 2018.0;
+    int Start_year = 1765;
+    int Restore_year_int = 2018;
+    
+    int overshoot = 0;
+    //////////////////////////////////////////////////////////////////////////////
     
     int count_annual = 0;
     
@@ -425,7 +516,7 @@ int main()
             //Select a scneario by commenting out all but one scnearios from the setCO2RCPXX, setRnonCO2_RCPXXK and setRnonCO2_RCPXX functions/////////////////////
             //These must all match!!///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             
-            if(RCP_scenario==1) //Sets up RCP2.6 (RCP3PD) as the forcing
+            if(Future_scenario==1) //Sets up RCP2.6 (RCP3PD) as the forcing
             {
                 setCO2RCP3PD(PgCtoppm);
                 convertCO2(t_step_per_year); //Converts the CO2 scenario to the sub-annual timesteps;
@@ -446,7 +537,7 @@ int main()
                 
             }
             
-            if(RCP_scenario == 2)
+            if(Future_scenario == 2)
             {
                 setCO2RCP45(PgCtoppm);
                 convertCO2(t_step_per_year); //Converts the CO2 scenario to the sub-annual timesteps;
@@ -467,7 +558,7 @@ int main()
                 
             }
             
-            if(RCP_scenario == 3)
+            if(Future_scenario == 3)
             {
                 setCO2RCP6(PgCtoppm);
                 convertCO2(t_step_per_year); //Converts the CO2 scenario to the sub-annual timesteps;
@@ -488,7 +579,7 @@ int main()
                 
             }
             
-            if(RCP_scenario == 4)
+            if(Future_scenario == 4)
             {
                 setCO2RCP85(PgCtoppm);
                 convertCO2(t_step_per_year); //Converts the CO2 scenario to the sub-annual timesteps;
@@ -508,6 +599,43 @@ int main()
                 }
                 
             }
+            
+            if(Future_scenario == 5)
+            {
+                setCO2RCP3PD(PgCtoppm);
+                convertCO2(t_step_per_year); //Converts the CO2 scenario to the sub-annual timesteps;
+                
+                if(Target1 < 2.01)
+                {
+                    setRnonCO2_RCP3PD_K();
+                }
+                else
+                {
+                    setRnonCO2_RCP45_K();
+                }
+                convertRnonCO2(t_step_per_year); //Converts radiative forcing from other Kyoto agents to sub-annual timesteps////
+                //Set RnonCO2_Kyoto gasses array
+                for(int n=0; n<tmax; n++)
+                {
+                    RnonCO2_Kyoto[n] = RnonCO2[n]; //Radiative frocing from CH4, N2O and Halogens
+                }
+                
+                if(Target1 < Target_threshold)
+                {
+                    setRnonCO2_RCP3PD();
+                }
+                else
+                {
+                    setRnonCO2_RCP45();
+                }
+                convertRnonCO2(t_step_per_year); //Converts to current sub-annual timesteps///////////////
+                //Subtract the Kyoto gasses from RnonCO2, leaving only non-Kyoto gasses and aerosols + aerosol precursors
+                for(int n=0; n<tmax; n++)
+                {
+                    RnonCO2[n] =  RnonCO2[n] - RnonCO2_Kyoto[n]; //Efficacy weighted radiative frocing from aerosols and other non-Kyoto agents
+                }
+            }
+            
             
             
             //Calculate 2011 values for the standard case with no uncertainty and scaling to match observations///
@@ -573,7 +701,8 @@ int main()
             
         }
         
-        
+        overshoot = 0;
+        int i_last_check_year = 0;
         
         for (int i = 0; i<tmax; i++) //Initialise heat content changes in upper and deep ocean
         {
@@ -666,7 +795,205 @@ int main()
                 
                 //Note: 0.9 coefficient in above equation is needed for stability - if you do not have it then you can get I_em in an unstable oscillation about CO2_restore[i]
                 
-          
+            //Adjusting Mitigation Pathways code////////////////////////////
+            /////////////////////////////////////////////////////////////////
+            
+            //Start of AMP scenarios, linear reductions to stabilise climate at given level of surface warming.
+            
+            if(Future_scenario == 5 && year[i] > Restore_year - (dt/2.0) )
+            {
+                
+                //New scheme////////////////////////////////////////////
+                
+                double EmRate =0.0; //Annual carbon emission rate in PgC yr-1
+                double EmRate_assess = 0.0; //Annual carbon emissions rate at the Assess year
+                
+                //Total annual emissions from land use change and fossil fuels = (I_em[i] + I_ter[i]) - (I_em[i-1] + I_ter[i-1])
+                
+                
+                
+                EmRate = getRateINDCs(year[i]);
+                
+                
+                
+                if( year[i] > (Restore_year-(dt/2.0)) ) //Estimate emissions needed to
+                {
+                    
+                    
+                    
+                    
+                    
+                    
+                    //
+                    if( i == (2030-Start_year)*t_step_per_year || i == (2040-Start_year)*t_step_per_year || i == (2050-Start_year)*t_step_per_year || i == (2060-Start_year)*t_step_per_year || i == (2070-Start_year)*t_step_per_year || i == (2080-Start_year)*t_step_per_year || i == (2090-Start_year)*t_step_per_year || i == (2100-Start_year)*t_step_per_year || i == (2125-Start_year)*t_step_per_year )
+                    {
+                        i_last_check_year = i;
+                        
+                        //Calculate average temperatures
+                        double DT_ave_1961_1990 = 0.0;
+                        double DT_ave_2003_2012 = 0.0;
+                        double DT_ave2=0.0;
+                        double Emissions_1975_2025= 460.6; //Estimate from Carbon Budget plus INDC
+                        double Emissions_2008_minus5years=0.0;
+                        
+                        
+                        if(i == (2030-Start_year)*t_step_per_year)
+                        {
+                            EmRate_Assessment = getRateINDCs(2030.0);
+                        }
+                        
+                        if(i > (2030-Start_year)*t_step_per_year)
+                        {
+                            //Rate of emission over last 12 months
+                            EmRate_Assessment = ( (I_em[i-1]+I_ter[i-1])-(I_em[i-t_step_per_year-1]+I_ter[i-t_step_per_year-1]) ) ;// ( (I_em[i-1]+I_ter[i-1])-(I_em[i-2]+I_ter[i-2]) )* double(t_step_per_year);
+                        }
+                        
+                        
+                        
+                        
+                        for(int n = (1961-Start_year)*t_step_per_year; n< (1991-Start_year)*t_step_per_year; n++)
+                        {
+                            DT_ave_1961_1990 += DeltaT[n];
+                        }
+                        DT_ave_1961_1990 = DT_ave_1961_1990/(30.0*double(t_step_per_year));
+                        
+                        
+                        
+                        for(int n = (2003-Start_year)*t_step_per_year; n< (2013-Start_year)*t_step_per_year; n++)
+                        {
+                            DT_ave_2003_2012 += DeltaT[n];
+                        }
+                        DT_ave_2003_2012 = DT_ave_2003_2012/(10.0*double(t_step_per_year));
+                        
+                        
+                        
+                        
+                        for(int n = 0; n< 10*t_step_per_year; n++)
+                        {
+                            DT_ave2 += DeltaT[i-11*t_step_per_year+n];
+                        }
+                        DT_ave2 = DT_ave2/(10.0*double(t_step_per_year));
+                        
+                        Emissions_2008_minus5years = (I_em[i-5*t_step_per_year] + I_ter[i-5*t_step_per_year]) - (I_em[(2008-Start_year)*t_step_per_year] + I_ter[(2008-Start_year)*t_step_per_year]);
+                        
+                        //Estimate TCRE from 2003_2012 and ten year period prior to Assess_year1
+                        TCRE_estimate = (DT_ave2 - DT_ave_2003_2012)/Emissions_2008_minus5years + TCRE_safety;
+                        
+                        
+                        //Estimate remaining allowable emissions////////////////////////////////
+                        if(Target1 > DT_ave2 - DT_ave_2003_2012 + 0.78 + Coeff_Target)
+                        {
+                            I_remaining = ((Target1-0.78-Coeff_Target) - (DT_ave2-DT_ave_2003_2012) )/TCRE_estimate;
+                        }
+                        if(Target1 <= DT_ave2 - DT_ave_2003_2012 + 0.78 + Coeff_Target)
+                        {
+                            I_remaining = 0.0;
+                            overshoot = 1;
+                        }
+                        
+                        //Estimate phase-out time
+                        t_remaining = 2.0*I_remaining/EmRate_Assessment;
+                        
+                        
+                        cout << year[i] << '\t' << TCRE_estimate << '\t' << DT_ave2 - DT_ave_2003_2012 + 0.78 << '\t' << t_remaining << '\t' << I_remaining << '\t' << DT_ave_2003_2012 << '\t' << DT_ave2 << '\t' << Emissions_2008_minus5years << '\t' << (I_em[i-5*t_step_per_year] + I_ter[i-5*t_step_per_year]) << '\t' << I_em[(2008-Start_year)*t_step_per_year] + I_ter[(2008-Start_year)*t_step_per_year] << endl;
+                        
+                        if(data_fit>=16)
+                        {
+                            Adjustment_TCRE << j << '\t' << TCRE_estimate;
+                            Adjustment_DT << j << '\t' << DT_ave2 - DT_ave_2003_2012 + 0.78;
+                            if(I_remaining > 0.0)
+                            {
+                                Adjustment_Emtime << j << '\t' << year[i]+t_remaining ;
+                                
+                            }
+                            Adjustment_Emrate << j << '\t' << EmRate_Assessment;
+                        }
+                    }
+                    
+                    //Calculate emissions between assessment points 1 and 2//////////////////////
+                    /////////////////////////////////////////////////////////////////////////////
+                    if( year[i] > 2030.0 && year[i] < year[i_last_check_year]+t_remaining && year[i]<=2150.0)
+                    {
+                        
+                        EmRate = EmRate_Assessment*(1.0 - (year[i] - year[i_last_check_year])/(t_remaining));
+                        //cout << EmRate_assess << '\t' << EmRate << endl;
+                    }
+                    ////////////////////////////////////////////////////////
+                    
+                    if(year[i] > 2030.0 && year[i] >= year[i_last_check_year]+t_remaining && year[i] <= 2150.0)
+                    {
+                        EmRate = 0.0;
+                    }
+                    
+                    
+                    
+                    //Below ammends if over warming target////////
+                    
+                    //From 2150, add in carbon if below warming target, and remove carbon if above target
+                    if( ( (year[i] >= 2030.0 && overshoot == 1) || year[i] >= 2150.0 ) && year[i] < 2300.0)
+                    {
+                        double DT_ave_2003_2012 = 0.0;
+                        double DT_ave2 = 0.0;
+                        
+                        for(int n = 0; n< 10*t_step_per_year; n++)
+                        {
+                            DT_ave_2003_2012 += DeltaT[(2003-Start_year)*t_step_per_year+n];
+                        }
+                        DT_ave_2003_2012 = DT_ave_2003_2012/(10.0*double(t_step_per_year));
+                        
+                        //Last 10 years (11 years ago to 1 year ago///////////////////
+                        for(int n = 0; n< 10*t_step_per_year; n++)
+                        {
+                            DT_ave2 += DeltaT[i-11*t_step_per_year+n];
+                        }
+                        DT_ave2 = DT_ave2/(10.0*double(t_step_per_year));
+                        
+                        
+                        if( DT_ave2 - DT_ave_2003_2012 + 0.78 > Target1+0.00)
+                        {
+                            EmRate = -1.0;
+                            //cout << "negative  emissions" << endl;
+                            overshoot=1;
+                        }
+                        
+                        if( DT_ave2 - DT_ave_2003_2012 + 0.78 > Target1+0.05)
+                        {
+                            EmRate = -2.0;
+                            //cout << "negative  emissions" << endl;
+                            overshoot=1;
+                        }
+                        
+                        if( DT_ave2 - DT_ave_2003_2012 + 0.78 > Target1+0.1)
+                        {
+                            EmRate = -3.0;
+                            //cout << "negative  emissions" << endl;
+                            overshoot=1;
+                        }
+                        
+                        if(EmRate < 0.01 && DT_ave2 - DT_ave_2003_2012 + 0.78 < Target1 - 0.2)
+                        {
+                            EmRate = 1.0;
+                            //cout << "negative  emissions" << endl;
+                            
+                        }
+                    }
+                    
+                    
+                    I_em[i] = (I_em[i-1] + I_ter[i-1] - I_ter[i]) + EmRate*dt;
+                    
+                }
+                
+            }
+            
+            
+            
+            
+            
+            ///End of AMP scenario (linear reductions)
+            ///////////////////////////////////////////////////////
+            ///////////////////////////////////////////////////////
+            
+            
             
             
             
@@ -1294,20 +1621,58 @@ int main()
                 {
                     for(int longitude = 0; longitude < 128; longitude++)
                     {
-                        if(RCP_scenario == 4)
+                        if(Future_scenario == 5 && Target1 < Target_threshold)
                         {
-                            
-                            
-                            results2 << '\t' <<  (DT_81_00 - DT_50_00) * (LGRTC_RCP85[lat][longitude] + spatial_uncert*Stdev_LGRTC_RCP85[lat][longitude]) ;
-                            
+                            //Use "Close to Paris" spatial pattern
+                            LGRTC[lat][longitude] = LGRTC_combined_close_to_Paris[lat][longitude];
+                            Stdev_LGRTC[lat][longitude] = Stdev_LGRTC_combined_close_to_Paris[lat][longitude];
                             
                         }
-                        if(RCP_scenario < 4)
+                        if(Future_scenario == 5 && Target1 > Target_threshold)
                         {
-                            
-                            
-                            results2 << '\t' <<  (DT_81_00 - DT_50_00) * (LGRTC_RCP45[lat][longitude] + spatial_uncert*Stdev_LGRTC_RCP45[lat][longitude]) ;
+                            //Use "Exceeding Paris" spatial pattern
+                            LGRTC[lat][longitude] = LGRTC_combined_exceeding_Paris[lat][longitude];
+                            Stdev_LGRTC[lat][longitude] = Stdev_LGRTC_combined_exceeding_Paris[lat][longitude];
+                    
                         }
+                        if(Future_scenario == 4)
+                        {
+                            //Use RCP8.5 pattern
+                            LGRTC[lat][longitude] = LGRTC_RCP85[lat][longitude];
+                            Stdev_LGRTC[lat][longitude] = Stdev_LGRTC_RCP85[lat][longitude];
+                    
+                        }
+                        if(Future_scenario == 2)
+                        {
+                            //Use RCP4.5 pattern
+                            //Use RCP8.5 pattern
+                            LGRTC[lat][longitude] = LGRTC_RCP45[lat][longitude];
+                            Stdev_LGRTC[lat][longitude] = Stdev_LGRTC_RCP45[lat][longitude];
+                        }
+                        if(Future_scenario == 1)
+                        {
+                            //Use 'RCP2.6 peak' pattern
+                            //Use RCP8.5 pattern
+                            LGRTC[lat][longitude] = LGRTC_RCP26_peak[lat][longitude];
+                            Stdev_LGRTC[lat][longitude] = Stdev_LGRTC_RCP26_peak[lat][longitude];
+                        }
+                        if(Future_scenario == 3)
+                        {
+                            //Use "Exceeding Paris" pattern
+                            LGRTC[lat][longitude] = LGRTC_combined_exceeding_Paris[lat][longitude];
+                            Stdev_LGRTC[lat][longitude] = Stdev_LGRTC_combined_exceeding_Paris[lat][longitude];
+                            
+                        }
+                    }
+                }
+                
+                for (int lat = 0; lat < 64; lat++)
+                {
+                    for(int longitude = 0; longitude < 128; longitude++)
+                    {
+                        
+                        results2 << '\t' <<  (DT_81_00 - DT_50_00) * (LGRTC[lat][longitude] + spatial_uncert*Stdev_LGRTC[lat][longitude]) ;
+                        
                         
                         if(longitude == 127 && lat < 63)
                         {
