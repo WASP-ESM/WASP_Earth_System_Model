@@ -109,38 +109,38 @@ int main()
     double LGRTC_combined_arbitrary[64][128];
     double Stdev_LGRTC_combined_arbitrary[64][128];
     
-    double LGRTC_combined_close_to_Paris[64][128];
-    double Stdev_LGRTC_combined_close_to_Paris[64][128];
+    double LGRTC_generic_lessthan_2C[64][128];
+    double Stdev_LGRTC_generic_lessthan_2C[64][128];
     
-    double LGRTC_combined_exceeding_Paris[64][128];
-    double Stdev_LGRTC_combined_exceeding_Paris[64][128];
+    double LGRTC_generic_MoreThanOrEqual_2C[64][128];
+    double Stdev_LGRTC_generic_MoreThanOrEqual_2C[64][128];
     
     for (int k=0; k<64; k++)
     {
         for (int m=0; m<128; m++)
         {
             //For scenarios meeting or close to meeting the Paris Climate Agreement
-            LGRTC_combined_close_to_Paris[k][m] = (LGRTC_RCP26_peak[k][m] + LGRTC_RCP45[k][m])/2.0;
-            Stdev_LGRTC_combined_close_to_Paris[k][m] = sqrt( (Stdev_LGRTC_RCP26_peak[k][m]*Stdev_LGRTC_RCP26_peak[k][m]) + (Stdev_LGRTC_RCP45[k][m]*Stdev_LGRTC_RCP45[k][m]) );
+            LGRTC_generic_lessthan_2C[k][m] = (LGRTC_RCP26_peak[k][m] + LGRTC_RCP45[k][m])/2.0;
+            Stdev_LGRTC_generic_lessthan_2C[k][m] = sqrt( (Stdev_LGRTC_RCP26_peak[k][m]*Stdev_LGRTC_RCP26_peak[k][m]) + (Stdev_LGRTC_RCP45[k][m]*Stdev_LGRTC_RCP45[k][m]) );
             
             //This section claculates whether a point is insider the valid domain, and returns Not a Number if the point lies outside the domain
-            if( abs(LGRTC_RCP26_peak[k][m] - LGRTC_RCP45[k][m]) > Stdev_LGRTC_combined_close_to_Paris[k][m])
+            if( abs(LGRTC_RCP26_peak[k][m] - LGRTC_RCP45[k][m]) > Stdev_LGRTC_generic_lessthan_2C[k][m])
             {
-                LGRTC_combined_close_to_Paris[k][m] = sqrt(-1.0);
+                LGRTC_generic_lessthan_2C[k][m] = sqrt(-1.0);
             }
             
             //For scenarios exceeding the Paris Climate Agreement
-            LGRTC_combined_exceeding_Paris[k][m] = (LGRTC_RCP85[k][m] + LGRTC_RCP45[k][m])/2.0;
-            Stdev_LGRTC_combined_exceeding_Paris[k][m] = sqrt( (Stdev_LGRTC_RCP85[k][m]*Stdev_LGRTC_RCP85[k][m]) + (Stdev_LGRTC_RCP45[k][m]*Stdev_LGRTC_RCP45[k][m]) );
+            LGRTC_generic_MoreThanOrEqual_2C[k][m] = (LGRTC_RCP85[k][m] + LGRTC_RCP45[k][m])/2.0;
+            Stdev_LGRTC_generic_MoreThanOrEqual_2C[k][m] = sqrt( (Stdev_LGRTC_RCP85[k][m]*Stdev_LGRTC_RCP85[k][m]) + (Stdev_LGRTC_RCP45[k][m]*Stdev_LGRTC_RCP45[k][m]) );
             
             //This section claculates whether a point is insider the valid domain, and returns Not a Number if the point lies outside the domain
-            if( abs(LGRTC_RCP85[k][m] - LGRTC_RCP45[k][m]) > Stdev_LGRTC_combined_exceeding_Paris[k][m])
+            if( abs(LGRTC_RCP85[k][m] - LGRTC_RCP45[k][m]) > Stdev_LGRTC_generic_MoreThanOrEqual_2C[k][m])
             {
-                LGRTC_combined_exceeding_Paris[k][m] = sqrt(-1.0);
+                LGRTC_generic_MoreThanOrEqual_2C[k][m] = sqrt(-1.0);
             }
             
             //For arbitrary scenarios
-            LGRTC_combined_exceeding_Paris[k][m] = (LGRTC_RCP26_peak[k][m] + LGRTC_RCP85[k][m] + LGRTC_RCP45[k][m])/3.0;
+            LGRTC_generic_MoreThanOrEqual_2C[k][m] = (LGRTC_RCP26_peak[k][m] + LGRTC_RCP85[k][m] + LGRTC_RCP45[k][m])/3.0;
             Stdev_LGRTC_combined_arbitrary[k][m] = sqrt( (Stdev_LGRTC_RCP85[k][m]*Stdev_LGRTC_RCP85[k][m]) + (Stdev_LGRTC_RCP45[k][m]*Stdev_LGRTC_RCP45[k][m]) + (Stdev_LGRTC_RCP26_peak[k][m]*Stdev_LGRTC_RCP26_peak[k][m]));
             
             //This section claculates whether a point is insider the valid domain, and returns Not a Number if the point lies outside the domain
@@ -1624,15 +1624,15 @@ int main()
                         if(Future_scenario == 5 && Target1 < Target_threshold)
                         {
                             //Use "Close to Paris" spatial pattern
-                            LGRTC[lat][longitude] = LGRTC_combined_close_to_Paris[lat][longitude];
-                            Stdev_LGRTC[lat][longitude] = Stdev_LGRTC_combined_close_to_Paris[lat][longitude];
+                            LGRTC[lat][longitude] = LGRTC_generic_lessthan_2C[lat][longitude];
+                            Stdev_LGRTC[lat][longitude] = Stdev_LGRTC_generic_lessthan_2C[lat][longitude];
                             
                         }
                         if(Future_scenario == 5 && Target1 > Target_threshold)
                         {
                             //Use "Exceeding Paris" spatial pattern
-                            LGRTC[lat][longitude] = LGRTC_combined_exceeding_Paris[lat][longitude];
-                            Stdev_LGRTC[lat][longitude] = Stdev_LGRTC_combined_exceeding_Paris[lat][longitude];
+                            LGRTC[lat][longitude] = LGRTC_generic_MoreThanOrEqual_2C[lat][longitude];
+                            Stdev_LGRTC[lat][longitude] = Stdev_LGRTC_generic_MoreThanOrEqual_2C[lat][longitude];
                     
                         }
                         if(Future_scenario == 4)
@@ -1659,8 +1659,8 @@ int main()
                         if(Future_scenario == 3)
                         {
                             //Use "Exceeding Paris" pattern
-                            LGRTC[lat][longitude] = LGRTC_combined_exceeding_Paris[lat][longitude];
-                            Stdev_LGRTC[lat][longitude] = Stdev_LGRTC_combined_exceeding_Paris[lat][longitude];
+                            LGRTC[lat][longitude] = LGRTC_generic_MoreThanOrEqual_2C[lat][longitude];
+                            Stdev_LGRTC[lat][longitude] = Stdev_LGRTC_generic_MoreThanOrEqual_2C[lat][longitude];
                             
                         }
                     }
