@@ -18,9 +18,9 @@
 
 %This MATLAB code projects local warming relative to the 1850-1900 averages for a specified future cumulative carbon emission after the start of 2018
 
-%Alter Em below to set the emission size after the start of 2018. Projections are masde if global mean surface warming is > 2°C.
+%Alter Em below to set the emission size after the start of 2018.
 
-%Projections assumes the ratio of non-CO2 radiative forcing to CO2 radiative forcing is similar to RCP scenarios RCP8.5, RCP2.6 or RCP4.5.
+%Projections assumes the ratio of non-CO2 radiative forcing to CO2 radiative forcing is similar to RCP scenarios RCP8.5, RCP2.6 or RCP4.5. Projections are made if emission size gives global mean warming > 2°C above 1850-1900 average.
 
 %Requires toolbox allowing mappng tool 'worldmap world' to be called.
 
@@ -944,7 +944,7 @@ if(muEm > 2.0)
     plotm(-33.9,151.2,'o','MarkerFaceColor','c','MarkerEdgeColor','k','MarkerSize',10); %Sydney
     plotm(39.9,116.4,'o','MarkerFaceColor',[0.6 0.2 0],'MarkerEdgeColor','k','MarkerSize',10);       %Beijing
     plotm(30.0,31.2,'o','MarkerFaceColor',[0.3 0.3 0.3],'MarkerEdgeColor','k','MarkerSize',10);       %Cairo
-    plotm(-23.6,-46.6,'o','MarkerFaceColor','m','MarkerEdgeColor','k','MarkerSize',10);       %Dehli
+    plotm(-23.6,-46.6,'o','MarkerFaceColor','m','MarkerEdgeColor','k','MarkerSize',10);       %Sao Paulo
 
     colorbar;
 
@@ -1002,7 +1002,6 @@ if(muEm > 2.0)
     plot(T_bins, YLosAngeles, 'Color','b', 'LineWidth',2)
     plot(T_bins, YSydney, 'Color','c', 'LineWidth',2)
     plot(T_bins, YBeijing,'Color',[0.6 0.2 0], 'LineWidth',2)
-    %plot(T_bins, YDehli,'Color','m', 'LineWidth',2)
     plot(T_bins, YCairo,'Color',[0.3 0.3 0.3], 'LineWidth',2)
     plot(T_bins, YSaoPaulo,'Color','m', 'LineWidth',2);
 
