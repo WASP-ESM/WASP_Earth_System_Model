@@ -27,7 +27,7 @@
 %Em is Emission size in PgC, total emissions after the start of 2018.
 
 
-Em=500.0;
+Em=600.0;
 
 LGRTC_RCP26_peak=[1.43306    1.42189    1.40933    1.39252    1.37883    1.36406    1.34821    1.33332    1.32598    1.31797    1.30872    1.30556    1.29878    1.29158    1.28548    1.27568    1.27024    1.26825    1.2673    1.26539    1.26436    1.26281    1.26531    1.2646    1.26648    1.26584    1.27338    1.27399    1.27717    1.27758    1.26738    1.26879    1.2619    1.25215    1.24256    1.24011    1.23992    1.23812    1.23717    1.23741    1.23895    1.24213    1.24561    1.24949    1.25343    1.25846    1.26424    1.27024    1.2771    1.2846    1.2921    1.29993    1.30896    1.31896    1.32905    1.33951    1.34076    1.35159    1.37358    1.38408    1.3794    1.39804    1.41514    1.41693    1.42247    1.42709    1.43141    1.43477    1.43832    1.44234    1.44693    1.45214    1.45751    1.46234    1.46717    1.47133    1.47591    1.48013    1.48287    1.4829    1.48092    1.47727    1.47129    1.4623    1.45197    1.44111    1.43011    1.42043    1.41088    1.40108    1.39128    1.38268    1.37603    1.37311    1.37233    1.37405    1.37801    1.38369    1.38819    1.3926    1.39823    1.40415    1.41269    1.42216    1.43151    1.44049    1.44928    1.45813    1.46673    1.47809    1.48813    1.49674    1.5045    1.50894    1.51207    1.51221    1.50936    1.50411    1.49812    1.49285    1.48712    1.48092    1.47481    1.4697    1.46338    1.45571    1.44707    1.43321
                   0.93901    0.93392    0.93111    0.92599    0.92445    0.9262    0.93081    0.94342    0.96016    0.97616    0.98993    1.00644    1.02332    1.0404    1.05747    1.06969    1.08104    1.09457    1.10837    1.12109    1.13426    1.14723    1.16347    1.18343    1.21813    1.27435    1.34778    1.39954    1.46005    1.51662    1.55046    1.53109    1.4939    1.44355    1.39361    1.34759    1.30808    1.27832    1.2509    1.2275    1.20882    1.19572    1.1852    1.181    1.17947    1.17791    1.17689    1.17731    1.18357    1.19646    1.21726    1.2416    1.27033    1.30501    1.34272    1.38143    1.42133    1.46076    1.49673    1.52891    1.54404    1.56338    1.57646    1.57767    1.56985    1.5513    1.5285    1.51241    1.4961    1.48414    1.4764    1.4582    1.43995    1.41929    1.41538    1.417    1.42196    1.43482    1.44654    1.45899    1.46987    1.47925    1.48684    1.4904    1.48745    1.47122    1.44459    1.40573    1.35933    1.3089    1.26101    1.21937    1.18754    1.16984    1.15895    1.16641    1.18686    1.1838    1.16037    1.2916    1.31438    1.34138    1.36116    1.3785    1.38971    1.3877    1.38467    1.38064    1.37591    1.37154    1.3593    1.33351    1.30191    1.26129    1.2194    1.18054    1.12741    1.108    1.06624    1.04231    1.0113    0.98928    0.97105    0.95418    0.94112    0.94109    0.94285    0.94137
@@ -917,121 +917,111 @@ for i=1:64
 end
 
 
-if(muEm >= 1.95)
+if(muEm > 2.0)
 
     T_Em=muEm*LGRTC_exceedPA;
     %multiply and then square root
     Stdev_T_Em = ( (sigmaEm*sigmaEm)/(muEm*muEm) ) + ( (Stdev_exceedPA.*Stdev_exceedPA)./(LGRTC_exceedPA.*LGRTC_exceedPA) );
     Stdev_T_Em = T_Em.*sqrt(Stdev_T_Em);
 
+
+    colormap(flipud(hot));
+
+    subplot(2,1,1)
+    worldmap world;
+
+    load coastlines;
+    whos;
+
+    %caxis([0,15]);
+
+    surfacem(lat,lon,T_Em);
+
+    plotm(coastlat,coastlon,'k');
+    plotm(51.5,0,'o','MarkerFaceColor','r','MarkerEdgeColor','k','MarkerSize',10);  %London
+    plotm(45.6,-79.4,'o','MarkerFaceColor','g','MarkerEdgeColor','k','MarkerSize',10); %Toronto
+    plotm(34.0,-118.4,'o','MarkerFaceColor','b','MarkerEdgeColor','k','MarkerSize',10); %Los Angeles
+    plotm(-33.9,151.2,'o','MarkerFaceColor','c','MarkerEdgeColor','k','MarkerSize',10); %Sydney
+    plotm(39.9,116.4,'o','MarkerFaceColor',[0.6 0.2 0],'MarkerEdgeColor','k','MarkerSize',10);       %Beijing
+    plotm(30.0,31.2,'o','MarkerFaceColor',[0.3 0.3 0.3],'MarkerEdgeColor','k','MarkerSize',10);       %Cairo
+    plotm(-23.6,-46.6,'o','MarkerFaceColor','m','MarkerEdgeColor','k','MarkerSize',10);       %Dehli
+
+    colorbar;
+
+
+    subplot(2,1,2)
+    y=ltln2val(T_Em,[1/2.8125 90 180], 51.5,0)
+    y2=ltln2val(Stdev_T_Em,[1/2.8125 90 180], 51.5,0)
+
+    YLondon=normpdf(T_bins,y,y2);
+
+    y=ltln2val(T_Em,[1/2.8125 90 180], 45.6,-79.4);
+    y2=ltln2val(Stdev_T_Em,[1/2.8125 90 180], 45.6,-79.4);
+    YTorronto=normpdf(T_bins,y,y2);
+
+    y=ltln2val(T_Em,[1/2.8125 90 180], 38.9,-77.0);
+    y2=ltln2val(Stdev_T_Em,[1/2.8125 90 180], 34.0,-118.4);
+    YLosAngeles=normpdf(T_bins,y,y2);
+
+    y=ltln2val(T_Em,[1/2.8125 90 180], -35.2,149);
+    y2=ltln2val(Stdev_T_Em,[1/2.8125 90 180], -33.9,151.2);
+    YSydney=normpdf(T_bins,y,y2);
+
+    y=ltln2val(T_Em,[1/2.8125 90 180], 39.9,116.4);
+    y2=ltln2val(Stdev_T_Em,[1/2.8125 90 180], 39.9,116.4);
+    YBeijing=normpdf(T_bins,y,y2);
+
+    YGlobal=normpdf(T_bins,muEm,sigmaEm);
+
+
+    y=ltln2val(T_Em,[1/2.8125 90 180], 28.7,77.1)
+    y2=ltln2val(Stdev_T_Em,[1/2.8125 90 180], 28.7,77.1)
+
+    YDehli=normpdf(T_bins,y,y2);
+
+
+    y=ltln2val(T_Em,[1/2.8125 90 180], 28.7,77.1)
+    y2=ltln2val(Stdev_T_Em,[1/2.8125 90 180], 30.0, 31.2)
+
+    YCairo=normpdf(T_bins,y,y2);
+
+    y=ltln2val(T_Em,[1/2.8125 90 180], 28.7,77.1)
+    y2=ltln2val(Stdev_T_Em,[1/2.8125 90 180], -23.6,-46.6)
+
+    YSaoPaulo=normpdf(T_bins,y,y2);
+
+
+
+
+
+    subplot(2,1,2)
+    plot(T_bins, YGlobal,'k--','LineWidth',2)
+    hold on;
+    plot(T_bins, YLondon, 'Color','r', 'LineWidth',2)
+    plot(T_bins, YTorronto, 'Color','g', 'LineWidth',2)
+    plot(T_bins, YLosAngeles, 'Color','b', 'LineWidth',2)
+    plot(T_bins, YSydney, 'Color','c', 'LineWidth',2)
+    plot(T_bins, YBeijing,'Color',[0.6 0.2 0], 'LineWidth',2)
+    %plot(T_bins, YDehli,'Color','m', 'LineWidth',2)
+    plot(T_bins, YCairo,'Color',[0.3 0.3 0.3], 'LineWidth',2)
+    plot(T_bins, YSaoPaulo,'Color','m', 'LineWidth',2);
+
+    xlim([0 3*muEm])
+
+    xlabel('Warming (K)','Fontsize',14)
+    ylabel('Probability density (1/K)','Fontsize',14)
+
 end
-if(muEm < 1.95)
-
-    T_Em=muEm*LGRTC_closePA;
-    %multiply and then square root
-    Stdev_T_Em = ( (sigmaEm*sigmaEm)/(muEm*muEm) ) + ( (Stdev_closePA.*Stdev_closePA)./(LGRTC_closePA.*LGRTC_closePA) );
-    Stdev_T_Em = T_Em.*sqrt(Stdev_T_Em);
-
-end
-
-colormap(flipud(hot));
-
-subplot(2,1,1)
-worldmap world;
-
-load coastlines;
-whos;
-
-%caxis([0,15]);
-
-surfacem(lat,lon,T_Em);
-
-plotm(coastlat,coastlon,'k');
-plotm(51.5,0,'o','MarkerFaceColor','r','MarkerEdgeColor','k','MarkerSize',10);  %London
-plotm(45.6,-79.4,'o','MarkerFaceColor','g','MarkerEdgeColor','k','MarkerSize',10); %Toronto
-plotm(34.0,-118.4,'o','MarkerFaceColor','b','MarkerEdgeColor','k','MarkerSize',10); %Los Angeles
-plotm(-33.9,151.2,'o','MarkerFaceColor','c','MarkerEdgeColor','k','MarkerSize',10); %Sydney
-plotm(39.9,116.4,'o','MarkerFaceColor',[0.6 0.2 0],'MarkerEdgeColor','k','MarkerSize',10);       %Beijing
-plotm(30.0,31.2,'o','MarkerFaceColor',[0.3 0.3 0.3],'MarkerEdgeColor','k','MarkerSize',10);       %Cairo
-plotm(-23.6,-46.6,'o','MarkerFaceColor','m','MarkerEdgeColor','k','MarkerSize',10);       %Dehli
-
-colorbar;
-
-
-subplot(2,1,2)
-y=ltln2val(T_Em,[1/2.8125 90 180], 51.5,0)
-y2=ltln2val(Stdev_T_Em,[1/2.8125 90 180], 51.5,0)
-
-YLondon=normpdf(T_bins,y,y2);
-
-y=ltln2val(T_Em,[1/2.8125 90 180], 45.6,-79.4);
-y2=ltln2val(Stdev_T_Em,[1/2.8125 90 180], 45.6,-79.4);
-YTorronto=normpdf(T_bins,y,y2);
-
-y=ltln2val(T_Em,[1/2.8125 90 180], 38.9,-77.0);
-y2=ltln2val(Stdev_T_Em,[1/2.8125 90 180], 34.0,-118.4);
-YLosAngeles=normpdf(T_bins,y,y2);
-
-y=ltln2val(T_Em,[1/2.8125 90 180], -35.2,149);
-y2=ltln2val(Stdev_T_Em,[1/2.8125 90 180], -33.9,151.2);
-YSydney=normpdf(T_bins,y,y2);
-
-y=ltln2val(T_Em,[1/2.8125 90 180], 39.9,116.4);
-y2=ltln2val(Stdev_T_Em,[1/2.8125 90 180], 39.9,116.4);
-YBeijing=normpdf(T_bins,y,y2);
-
-YGlobal=normpdf(T_bins,muEm,sigmaEm);
-
-
-y=ltln2val(T_Em,[1/2.8125 90 180], 28.7,77.1)
-y2=ltln2val(Stdev_T_Em,[1/2.8125 90 180], 28.7,77.1)
-
-YDehli=normpdf(T_bins,y,y2);
-
-
-y=ltln2val(T_Em,[1/2.8125 90 180], 28.7,77.1)
-y2=ltln2val(Stdev_T_Em,[1/2.8125 90 180], 30.0, 31.2)
-
-YCairo=normpdf(T_bins,y,y2);
-
-y=ltln2val(T_Em,[1/2.8125 90 180], 28.7,77.1)
-y2=ltln2val(Stdev_T_Em,[1/2.8125 90 180], -23.6,-46.6)
-
-YSaoPaulo=normpdf(T_bins,y,y2);
 
 
 
-
-
-subplot(2,1,2)
-plot(T_bins, YGlobal,'k--','LineWidth',2)
-hold on;
-plot(T_bins, YLondon, 'Color','r', 'LineWidth',2)
-plot(T_bins, YTorronto, 'Color','g', 'LineWidth',2)
-plot(T_bins, YLosAngeles, 'Color','b', 'LineWidth',2)
-plot(T_bins, YSydney, 'Color','c', 'LineWidth',2)
-plot(T_bins, YBeijing,'Color',[0.6 0.2 0], 'LineWidth',2)
-%plot(T_bins, YDehli,'Color','m', 'LineWidth',2)
-plot(T_bins, YCairo,'Color',[0.3 0.3 0.3], 'LineWidth',2)
-plot(T_bins, YSaoPaulo,'Color','m', 'LineWidth',2);
-
-xlim([0 3*muEm])
-
-xlabel('Warming (K)','Fontsize',14)
-ylabel('Probability density (1/K)','Fontsize',14)
 
 muEm
 sigmaEm
 
 
+if(muEm <= 2.0)
 
+    disp('Global Mean Warming under 2 degrees C, increase emission size.')
 
-
-
-
-
-
-
-
-
-
+end
