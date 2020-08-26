@@ -16,9 +16,9 @@
 
 
 
-%This MATLAB code projects local warming relative to the 1850-1900 averages for a specified future cumulative carbon emission after the start opf 2018
+%This MATLAB code projects local warming relative to the 1850-1900 averages for a specified future cumulative carbon emission after the start of 2018
 
-%Alter Em below to set the emission size after the start of 2018.
+%Alter Em below to set the emission size after the start of 2018. Projections are masde if global mean surface warming is > 2°C.
 
 %Projections assumes the ratio of non-CO2 radiative forcing to CO2 radiative forcing is similar to RCP scenarios RCP8.5, RCP2.6 or RCP4.5.
 
